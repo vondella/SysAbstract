@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Data;
 using System.Linq;
 using System.Security.Principal;
 using System.Threading.Tasks;
@@ -19,6 +21,10 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
+using Serilog.Events;
+//using Serilog.Events;
+using Serilog.Sinks.MSSqlServer;
 using Sys.Web.Services;
 
 namespace Brela.Web
@@ -70,9 +76,29 @@ namespace Brela.Web
                 options.ConnectionString = Configuration.GetConnectionString("Elmah"); 
             });
 
+
             //services.Configure<EmailConfiguration>(Configuration.GetSection("EmailConfiguration"));
             //services.AddLogging();
             //services.AddScoped<UserManager<ApplicationUser>>();
+
+            var columnOptions = new ColumnOptions
+            {
+                AdditionalDataColumns = new Collection<DataColumn>
+                {
+                    new DataColumn {DataType = typeof (string), ColumnName = "User"},
+                    new DataColumn {DataType = typeof (string), ColumnName = "Other"},
+                }
+            };
+            columnOptions.Store.Add(StandardColumn.LogEvent);
+            services.AddSingleton<Serilog.ILogger>
+            (x => new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                .MinimumLevel.Override("System", LogEventLevel.Error)
+                .WriteTo.MSSqlServer(Configuration["Serilog:ConnectionString"]
+                    ,Configuration["Serilog:TableName"], 
+                    columnOptions: columnOptions)
+                .CreateLogger());
 
             var emailConfig = Configuration
                 .GetSection("EmailConfiguration")
@@ -82,7 +108,6 @@ namespace Brela.Web
             services.AddRazorPages();
             services.AddTransient<IdentityManager>();
             services.AddTransient<IEmailSender, EmailSender>();
-
         }
 
 
@@ -104,6 +129,7 @@ namespace Brela.Web
             //app.UseMiddleware<ErrorLoggingMiddleware>();
 
             //app.UseHttpsRedirection();
+            
 
             app.UseElmah();
             app.UseStaticFiles();
