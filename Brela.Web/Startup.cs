@@ -16,6 +16,8 @@ using Brela.Web.Middlewares;
 using Brela.Web.Models;
 using ElmahCore.Mvc;
 using ElmahCore.Sql;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
@@ -25,6 +27,7 @@ using Serilog;
 using Serilog.Events;
 //using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
+using Sys.Web.Configurations.HealthChecks;
 using Sys.Web.Services;
 
 namespace Brela.Web
@@ -103,6 +106,9 @@ namespace Brela.Web
             var emailConfig = Configuration
                 .GetSection("EmailConfiguration")
                 .Get<EmailConfiguration>();
+            //services.AddHealthChecks();
+            services.AddHealthCheckService(Configuration);
+            services.AddHealthChecksUI();
             services.AddSingleton(emailConfig);
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -143,6 +149,17 @@ namespace Brela.Web
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
             });
+
+            app.UseHealthChecks("/health", new HealthCheckOptions()
+            {
+                Predicate = _ => true,
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
+            app.UseHealthChecksUI();
+            //    .UseHealthChecksUI(setup =>
+            //{
+            //    setup.AddCustomStylesheet(@"wwwroot\css\dotnet.css");
+            //});
         }
     }
 }
