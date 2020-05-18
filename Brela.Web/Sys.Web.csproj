@@ -11,6 +11,7 @@
     <PackageReference Include="AspNetCore.HealthChecks.System" Version="3.1.1" />
     <PackageReference Include="AspNetCore.HealthChecks.UI" Version="3.1.0" />
     <PackageReference Include="AspNetCore.HealthChecks.Uris" Version="3.1.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="elmahcore" Version="1.2.5" />
     <PackageReference Include="ElmahCore.Sql" Version="1.2.5" />
     <PackageReference Include="MailKit" Version="2.6.0" />
@@ -30,6 +31,7 @@
 
 
   <ItemGroup>
+    <ProjectReference Include="..\Sys.Logs\Sys.Jobs.csproj" />
     <ProjectReference Include="..\Sys.Util\Sys.Util.csproj" />
   </ItemGroup>
 

@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29318.209
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sys.Web", "Brela.Web\Sys.Web.csproj", "{F1130C1C-8057-49C3-9E67-89449D4F0941}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sys.Logs", "Sys.Logs\Sys.Logs.csproj", "{8A95F3BA-A234-4BDC-A8A8-01CF413E94E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sys.Jobs", "Sys.Logs\Sys.Jobs.csproj", "{8A95F3BA-A234-4BDC-A8A8-01CF413E94E6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sys.Domain", "Sys.Data\Sys.Domain.csproj", "{4ED0BA38-AE86-4968-9239-A354132726CB}"
 EndProject

@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using AutoMapper;
 using Brela.Web.Data;
 using Brela.Web.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -16,13 +18,18 @@ namespace Brela.Web.Controllers
     public class GroupsController : Controller
     {
         private ApplicationDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IIdentityManager _identityManager;
+        private readonly IMapper _mapper;
+        private Serilog.ILogger _logger;
             //,IdentityManager identityManager
-        public GroupsController(ApplicationDbContext context, IdentityManager identityManager)
+        public GroupsController(ApplicationDbContext context, IdentityManager identityManager,HttpContextAccessor httpContextAccessor,Serilog.ILogger logger, IMapper mapper)
         {
             _context = context;
-            //ApplicationDbContext context,
+            _logger = logger;
+            _httpContextAccessor = httpContextAccessor;
             _identityManager = identityManager;
+            _mapper = mapper;
         }
 
         //[Authorize(Roles = "Admin, CanEditGroup, CanEditUser")]
@@ -69,9 +76,10 @@ namespace Brela.Web.Controllers
                 _context.SaveChanges();
                 return RedirectToAction("Index");
             }
+            //var userDTO = _mapper.Map<UserDTO>(user);
+            _logger.ForContext("User", _httpContextAccessor.HttpContext.User.Identity.Name).Information("Data Added Successfully");
             return View(group);
         }
-
 
         //[Authorize(Roles = "Admin, CanEditGroup")]
         public ActionResult Edit(int? id)
@@ -100,6 +108,7 @@ namespace Brela.Web.Controllers
                await  _context.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
+
             return View(group);
         }
 

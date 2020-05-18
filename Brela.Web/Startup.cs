@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Security.Principal;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
@@ -25,8 +26,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
-//using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
+using Sys.Jobs;
+using Sys.Web.Configurations;
 using Sys.Web.Configurations.HealthChecks;
 using Sys.Web.Services;
 
@@ -41,79 +43,28 @@ namespace Brela.Web
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
-            services.AddIdentity<ApplicationUser,ApplicationRole>(options =>
-                    { 
-                        //options.SignIn.RequireConfirmedAccount = true;
-                options.Password.RequireDigit = true;
-                //options.Password.RequireLowercase = true;
-                options.Password.RequireNonAlphanumeric = true;
-                //options.Password.RequireUppercase = true;
-                options.Password.RequiredLength = 6;
-                options.Password.RequiredUniqueChars = 1;
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-                options.Lockout.MaxFailedAccessAttempts = 5;
-                options.Lockout.AllowedForNewUsers = true;
-                    }
-                    )
-                .AddEntityFrameworkStores<ApplicationDbContext>();
-            services.ConfigureApplicationCookie(options =>
-            {
-                // Cookie settings
-                options.Cookie.HttpOnly = true;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
-
-                options.LoginPath = "/Identity/Account/Login";
-                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-                options.SlidingExpiration = true;
-            });
-            services.AddElmah<SqlErrorLog>(options =>
-            {
-                options.ConnectionString = Configuration.GetConnectionString("Elmah"); 
-            });
-
-
-            //services.Configure<EmailConfiguration>(Configuration.GetSection("EmailConfiguration"));
-            //services.AddLogging();
-            //services.AddScoped<UserManager<ApplicationUser>>();
-
-            var columnOptions = new ColumnOptions
-            {
-                AdditionalDataColumns = new Collection<DataColumn>
-                {
-                    new DataColumn {DataType = typeof (string), ColumnName = "User"},
-                    new DataColumn {DataType = typeof (string), ColumnName = "Other"},
-                }
-            };
-            columnOptions.Store.Add(StandardColumn.LogEvent);
-            services.AddSingleton<Serilog.ILogger>
-            (x => new LoggerConfiguration()
-                .MinimumLevel.Information()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                .MinimumLevel.Override("System", LogEventLevel.Error)
-                .WriteTo.MSSqlServer(Configuration["Serilog:ConnectionString"]
-                    ,Configuration["Serilog:TableName"], 
-                    columnOptions: columnOptions)
-                .CreateLogger());
-
+            services.AddAutoMapper(typeof(Startup));
+            ServiceConfigurations.ConfigureIdentity(services, Configuration);
+            ServiceConfigurations.ConfigureElmah(services, Configuration);
+            ServiceConfigurations.ConfigureSerilog(services, Configuration);
             var emailConfig = Configuration
                 .GetSection("EmailConfiguration")
                 .Get<EmailConfiguration>();
-            //services.AddHealthChecks();
+            //health checks
             services.AddHealthCheckService(Configuration);
             services.AddHealthChecksUI();
+
             services.AddSingleton(emailConfig);
             services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddTransient<IdentityManager>();
             services.AddTransient<IEmailSender, EmailSender>();
+
+            // job schedule registrations 
+            services.AddSingleton<BackgroundWorker>();  
         }
 
 
