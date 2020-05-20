@@ -19,4 +19,5 @@ Package included
 2)	Healthcheck monitor
 3)	elmah
 4)	Triggers
-5)	elmah
+5)	serilog
+6)	Audit trails
