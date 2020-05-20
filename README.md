@@ -10,6 +10,7 @@ Startup.cs
 1)	Add connectionstring to appsettings.json
 2)	execute sql scripts for elmah and  customized serilog scripts
 2)	build and start project
+
 Default elmah path ~/elmah.
 
 Package included
