@@ -7,14 +7,13 @@ Using   SystemAbstract boilerplate
 Simple usage
 Startup.cs
 
-1)	Add connectionstring to appsettings.json
+1)	Add connection string to appsettings.json
 2)	execute sql scripts for elmah and  customized serilog scripts
 2)	build and start project
 
-Default elmah path ~/elmah.
+Default elmah path ~/elmah
 
 Package included
-
 1)	Backgroundworker for scheduling
 2)	Healthcheck monitor
 3)	elmah
