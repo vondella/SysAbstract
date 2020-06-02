@@ -20,6 +20,7 @@ using ElmahCore.Sql;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -86,8 +87,19 @@ namespace Brela.Web
             //app.UseMiddleware<ErrorLoggingMiddleware>();
 
             //app.UseHttpsRedirection();
-            
 
+            app.UseWhen(context => context.Request.Path.StartsWithSegments("/elmah", StringComparison.OrdinalIgnoreCase), appBuilder =>
+            {
+                appBuilder.Use(next =>
+                {
+                    return async ctx =>
+                    {
+                        ctx.Features.Get<IHttpBodyControlFeature>().AllowSynchronousIO = true;
+
+                        await next(ctx);
+                    };
+                });
+            });
             app.UseElmah();
             app.UseStaticFiles();
             app.UseRouting();
